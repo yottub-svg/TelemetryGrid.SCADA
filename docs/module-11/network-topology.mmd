@@ -1,0 +1,18 @@
+flowchart LR
+  subgraph OT[OT VLAN 130 — PLC и датчики]
+    PLC[PLC/SCADA controllers]
+    GW[Однонаправленный OT-шлюз]
+  end
+  subgraph DMZ[DMZ VLAN 140]
+    PROXY[Буферный API-прокси]
+    COL[Telemetry collector]
+  end
+  subgraph IT[IT VLAN 150 — офис]
+    UI[АРМ диспетчера read-only]
+    ADMIN[Админская зона]
+  end
+  PLC -->|OPC UA / Modbus TCP| GW
+  GW -->|только OT → DMZ| PROXY
+  PROXY --> COL
+  UI -->|HTTPS 443 только к Proxy| PROXY
+  ADMIN -.->|администрирование через jump host| PROXY
