@@ -1,14 +1,15 @@
 using TelemetryGrid.Application;
 using TelemetryGrid.Domain;
+using Xunit;
 
 namespace TelemetryGrid.Tests;
 
 public sealed class TelemetryStreamTests
 {
     [Fact]
-    public void Invalid_reading_is_rejected()
+    public async Task Invalid_reading_is_rejected()
     {
-        using var stream = new TelemetryStream();
+        await using var stream = new TelemetryStream();
         var reading = new TelemetryReading("", DateTimeOffset.UtcNow, 1, "kPa", 100);
         Assert.False(stream.TryPublish(reading));
     }
