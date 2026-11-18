@@ -1,12 +1,27 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using TelemetryGrid.Domain;
+using TelemetryGrid.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<IUserSecurityStore, InMemoryUserSecurityStore>();
+builder.Services.AddSingleton<SecurityStampCache>();
+builder.Services.AddAuthentication("TelemetryHeader").AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, HeaderAuthenticationHandler>("TelemetryHeader", _ => { });
+builder.Services.AddAuthorization(options => options.AddPolicy("Telemetry.Read", policy => policy.RequireClaim("permission", "telemetry.read")));
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 var app = builder.Build();
 
 app.MapHealthChecks("/health");
+app.UseMiddleware<SecurityStampValidationMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapGet("/telemetry/admin", () => Results.Ok(new { status = "ok" }))
+    .RequireAuthorization("Permission:telemetry.read");
 app.MapGet("/telemetry/stream", async (HttpContext context, int? count, CancellationToken cancellationToken) =>
 {
     var requestedCount = Math.Clamp(count ?? 100, 1, 200_000);

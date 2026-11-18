@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TelemetryGrid.Domain\TelemetryGrid.Domain.csproj" />
+    <ProjectReference Include="..\TelemetryGrid.Security\TelemetryGrid.Security.csproj" />
   </ItemGroup>
 </Project>
