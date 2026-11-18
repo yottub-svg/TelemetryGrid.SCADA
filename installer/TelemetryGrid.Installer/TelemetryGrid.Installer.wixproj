@@ -1,0 +1,10 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <DefineConstants>PublishDir=$(MSBuildProjectDirectory)\..\..\src\TelemetryGrid.WinForms\bin\Release\net8.0-windows\publish</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package Name="TelemetryGrid.SCADA" Manufacturer="TelemetryGrid" Version="1.0.0.0" UpgradeCode="4D2E04AE-6CF9-4DF6-A8F4-9C6D2E873D01" Scope="perMachine">
+    <SummaryInformation Description="TelemetryGrid.SCADA Windows Forms client" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of TelemetryGrid.SCADA is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="API_URL" Value="https://localhost:7040" />
+    <Feature Id="MainFeature" Title="TelemetryGrid.SCADA" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="ApplicationConfig" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="TelemetryGrid.SCADA" />
+    </StandardDirectory>
+
+    <Component Id="ApplicationConfig" Directory="INSTALLFOLDER" Guid="*">
+      <File Id="AppSettings" Source="$(var.ProjectDir)\TelemetryGrid.config" KeyPath="yes" />
+      <util:XmlFile Id="InjectApiUrl" File="[#AppSettings]" ElementPath="/configuration/appSettings/add[@key='ApiUrl']" Name="value" Value="[API_URL]" Action="create" />
+      <RegistryValue Root="HKLM" Key="Software\TelemetryGrid\SCADA" Name="ApiUrl" Type="string" Value="[API_URL]" />
+    </Component>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER" />
+  </Fragment>
+</Wix>
