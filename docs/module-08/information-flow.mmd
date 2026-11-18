@@ -1,0 +1,11 @@
+flowchart LR
+  PLC1[PLC цеха 1] -->|OPC UA / Modbus TCP| GW[OT-шлюз только чтение]
+  PLC2[PLC цеха 2] -->|OPC UA / Modbus TCP| GW
+  GW -->|mTLS HTTPS / NDJSON| FW[OT/IT Firewall]
+  FW --> PROXY[Буферный API-прокси]
+  PROXY --> API1[TelemetryGrid API A]
+  PROXY --> API2[TelemetryGrid API B]
+  API1 --> DB[(TimescaleDB primary)]
+  API2 --> DBR[(TimescaleDB replica)]
+  API1 --> UI1[АРМ диспетчера]
+  API2 --> UI2[Резервное АРМ]
