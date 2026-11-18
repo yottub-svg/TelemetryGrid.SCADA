@@ -1,0 +1,53 @@
+services:
+  telemetry-db:
+    image: timescale/timescaledb:latest-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: telemetry
+      POSTGRES_USER: telemetry_app
+      POSTGRES_PASSWORD: ${TELEMETRY_DB_PASSWORD:?set TELEMETRY_DB_PASSWORD}
+    volumes:
+      - telemetry-db-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U telemetry_app -d telemetry"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+
+  telemetry-api:
+    build:
+      context: ../..
+      dockerfile: ops/module-10/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Telemetry: Host=telemetry-db;Port=5432;Database=telemetry;Username=telemetry_app;Password=${TELEMETRY_DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      telemetry-db:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3s bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 768M
+
+volumes:
+  telemetry-db-data:
