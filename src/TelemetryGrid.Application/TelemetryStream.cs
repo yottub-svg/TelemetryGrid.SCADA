@@ -8,6 +8,7 @@ public sealed class TelemetryStream : IAsyncDisposable
     private readonly Channel<TelemetryReading> _channel;
     private readonly CancellationTokenSource _shutdown = new();
     private readonly Task _consumerTask;
+    private int _disposed;
 
     public event EventHandler<IReadOnlyList<TelemetryReading>>? BatchReady;
 
@@ -56,6 +57,7 @@ public sealed class TelemetryStream : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        if (Interlocked.Exchange(ref _disposed, 1) == 1) return;
         _channel.Writer.TryComplete();
         await _shutdown.CancelAsync().ConfigureAwait(false);
         try { await _consumerTask.ConfigureAwait(false); }
