@@ -13,5 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\TelemetryGrid.Application\TelemetryGrid.Application.csproj" />
     <ProjectReference Include="..\..\src\TelemetryGrid.Domain\TelemetryGrid.Domain.csproj" />
+    <ProjectReference Include="..\..\src\TelemetryGrid.Client\TelemetryGrid.Client.csproj" />
   </ItemGroup>
 </Project>
